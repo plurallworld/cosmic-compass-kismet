@@ -61,22 +61,20 @@ function YouPage() {
         <section>
           <h3 className="mb-3 font-serif text-lg text-ink">Last 30 days</h3>
           <div className="grid grid-cols-10 gap-1.5 rounded-2xl border border-border bg-card p-4 shadow-paper">
-            {Array.from({ length: 30 }).map((_, i) => {
-              const intensity = Math.random();
-              return (
-                <div
-                  key={i}
-                  className="aspect-square rounded-sm"
-                  style={{
-                    background:
-                      intensity > 0.7 ? "oklch(0.62 0.18 290)" :
-                      intensity > 0.4 ? "oklch(0.78 0.13 80 / 0.7)" :
-                      intensity > 0.15 ? "oklch(0.78 0.13 80 / 0.3)" :
-                      "oklch(0.9 0.01 75)",
-                  }}
-                />
-              );
-            })}
+            {[3,1,2,4,2,0,1,3,4,2,1,3,2,4,1,0,2,3,4,2,3,1,4,2,3,4,2,3,4,4].map((intensity, i) => (
+              <div
+                key={i}
+                className="aspect-square rounded-sm"
+                style={{
+                  background:
+                    intensity >= 4 ? "oklch(0.62 0.18 290)" :
+                    intensity === 3 ? "oklch(0.78 0.13 80 / 0.8)" :
+                    intensity === 2 ? "oklch(0.78 0.13 80 / 0.5)" :
+                    intensity === 1 ? "oklch(0.78 0.13 80 / 0.25)" :
+                    "oklch(0.9 0.01 75)",
+                }}
+              />
+            ))}
           </div>
         </section>
 
