@@ -1,8 +1,11 @@
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
 
 export function StarField({ count = 60 }: { count?: number }) {
-  const stars = useMemo(
-    () =>
+  const [stars, setStars] = useState<
+    Array<{ id: number; x: number; y: number; size: number; delay: number; opacity: number }>
+  >([]);
+  useEffect(() => {
+    setStars(
       Array.from({ length: count }, (_, i) => ({
         id: i,
         x: Math.random() * 100,
@@ -11,8 +14,8 @@ export function StarField({ count = 60 }: { count?: number }) {
         delay: Math.random() * 4,
         opacity: Math.random() * 0.6 + 0.2,
       })),
-    [count],
-  );
+    );
+  }, [count]);
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
       {stars.map((s) => (
