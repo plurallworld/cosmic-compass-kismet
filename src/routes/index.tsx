@@ -1,29 +1,34 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { CosmicHero } from "@/components/jyotish/CosmicHero";
+import { TabBar } from "@/components/jyotish/TabBar";
+import { Watching } from "@/components/jyotish/Watching";
+import { PrescriptionCard } from "@/components/jyotish/PrescriptionCard";
+import { MuhurtaTimeline } from "@/components/jyotish/MuhurtaTimeline";
+import { SignalGrid } from "@/components/jyotish/SignalGrid";
+import { InterventionCard } from "@/components/jyotish/InterventionCard";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Your App" },
-      { name: "description", content: "Replace this with a one-sentence description of your app." },
-      { property: "og:title", content: "Your App" },
-      { property: "og:description", content: "Replace this with a one-sentence description of your app." },
+      { title: "Today · Jyotish" },
+      { name: "description", content: "Your daily vital signs — Energy, Karma, Sky Pressure. The stars set the conditions; you write the story." },
     ],
   }),
-  component: Index,
+  component: Today,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function Today() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="min-h-screen bg-paper pb-24">
+      <CosmicHero />
+      <main className="mx-auto max-w-2xl space-y-7 px-5 pt-7">
+        <Watching />
+        <PrescriptionCard />
+        <MuhurtaTimeline />
+        <InterventionCard />
+        <SignalGrid />
+      </main>
+      <TabBar />
     </div>
   );
 }
