@@ -1,9 +1,10 @@
 import { today } from "@/lib/jyotish-data";
 
-const palette = {
+const palette: Record<"auspicious" | "peak" | "avoid" | "neutral", string> = {
   auspicious: "bg-[oklch(0.78_0.13_80/0.18)] text-[oklch(0.45_0.13_80)] ring-[oklch(0.78_0.13_80/0.4)]",
   peak: "bg-[oklch(0.62_0.18_290/0.15)] text-[oklch(0.45_0.18_290)] ring-[oklch(0.62_0.18_290/0.4)]",
   avoid: "bg-[oklch(0.55_0.2_25/0.12)] text-[oklch(0.5_0.2_25)] ring-[oklch(0.55_0.2_25/0.4)]",
+  neutral: "bg-secondary text-ink-soft ring-border",
 };
 
 export function MuhurtaTimeline() {
