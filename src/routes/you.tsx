@@ -14,6 +14,15 @@ export const Route = createFileRoute("/you")({
 });
 
 function YouPage() {
+  const currentTierIdx = today.soulTiers.findIndex((t) => t.name === today.user.soulTier);
+  const currentTier = today.soulTiers[currentTierIdx];
+  const nextTier = today.soulTiers[currentTierIdx + 1];
+  const progress = nextTier
+    ? ((today.user.lifetimeKarma - currentTier.at) / (nextTier.at - currentTier.at)) * 100
+    : 100;
+
+  const maxBreakdown = Math.max(...today.karmaBreakdown.map((b) => b.points));
+
   return (
     <div className="min-h-screen bg-paper pb-24">
       <header className="bg-cosmos text-white">
@@ -41,6 +50,18 @@ function YouPage() {
             })}
             <circle cx="60" cy="60" r="8" fill="oklch(0.78 0.13 80)" />
           </svg>
+
+          {nextTier && (
+            <div className="mx-auto mt-5 max-w-xs">
+              <div className="flex justify-between text-[10px] uppercase tracking-wider text-white/50">
+                <span>{currentTier.name}</span>
+                <span className="text-gold">{today.user.karmaToNextTier} to {nextTier.name}</span>
+              </div>
+              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/10">
+                <div className="h-full rounded-full bg-gradient-to-r from-gold-soft to-gold" style={{ width: `${progress}%` }} />
+              </div>
+            </div>
+          )}
         </div>
       </header>
 
@@ -56,6 +77,53 @@ function YouPage() {
             <div className="text-[10px] uppercase tracking-[0.18em] text-ink-soft">Karma streak</div>
             <div className="mt-2 font-serif text-3xl text-ink">9<span className="text-base text-ink-soft"> days</span></div>
           </div>
+        </section>
+
+        {/* Tier ladder */}
+        <section className="rounded-2xl border border-border bg-card p-5 shadow-paper">
+          <h3 className="mb-3 font-serif text-lg text-ink">The path</h3>
+          <ol className="space-y-2.5">
+            {today.soulTiers.map((t, i) => {
+              const reached = today.user.lifetimeKarma >= t.at;
+              const current = i === currentTierIdx;
+              return (
+                <li key={t.name} className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
+                  <span className={`grid h-7 w-7 place-items-center rounded-full font-serif text-sm ${
+                    current ? "bg-gold text-[oklch(0.18_0.06_285)] shadow-[0_0_12px_oklch(0.78_0.13_80/0.6)]"
+                    : reached ? "bg-secondary text-primary"
+                    : "border border-border text-ink-soft"
+                  }`}>
+                    {i + 1}
+                  </span>
+                  <span className={`font-serif ${current ? "text-ink" : reached ? "text-ink" : "text-ink-soft"}`}>
+                    {t.name}
+                  </span>
+                  <span className="text-xs tabular-nums text-ink-soft">{t.at.toLocaleString()}</span>
+                </li>
+              );
+            })}
+          </ol>
+        </section>
+
+        {/* Karma by dimension */}
+        <section className="rounded-2xl border border-border bg-card p-5 shadow-paper">
+          <h3 className="mb-3 font-serif text-lg text-ink">Where your karma flows</h3>
+          <ul className="space-y-2.5">
+            {today.karmaBreakdown.map((b) => (
+              <li key={b.dimension}>
+                <div className="mb-1 flex items-baseline justify-between text-sm">
+                  <span className="text-ink">{b.dimension}</span>
+                  <span className="tabular-nums text-ink-soft">{b.points}</span>
+                </div>
+                <div className="h-1.5 overflow-hidden rounded-full bg-secondary">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-[oklch(0.62_0.18_290)] to-[oklch(0.78_0.16_295)]"
+                    style={{ width: `${(b.points / maxBreakdown) * 100}%` }}
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
         </section>
 
         <section>
