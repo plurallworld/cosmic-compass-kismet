@@ -1,23 +1,27 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { TabBar } from "@/components/jyotish/TabBar";
-import { today, planetGlyph, type Planet } from "@/lib/jyotish-data";
-import { Send, Sparkles } from "lucide-react";
+import { Transits } from "@/components/jyotish/Transits";
+import { DashaTree } from "@/components/jyotish/DashaTree";
+import { today, planetGlyph, planetColor, houseMeaning, type Planet } from "@/lib/jyotish-data";
+import { Send, Sparkles, ChevronDown } from "lucide-react";
 
 export const Route = createFileRoute("/chart")({
   head: () => ({
     meta: [
       { title: "Chart · Jyotish" },
-      { name: "description", content: "Your natal chart, the eight life dimensions, and a conversation with the sky." },
+      { name: "description", content: "Your natal chart, transits, dashas, and a conversation with the sky." },
     ],
   }),
   component: ChartPage,
 });
 
 const planets: Planet[] = ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn", "Rahu", "Ketu"];
+const tabs = ["ask", "wheel", "transits", "dasha", "dimensions", "remedies"] as const;
+type Tab = typeof tabs[number];
 
 function ChartPage() {
-  const [tab, setTab] = useState<"ask" | "dimensions" | "wheel" | "remedies">("ask");
+  const [tab, setTab] = useState<Tab>("ask");
   return (
     <div className="min-h-screen bg-paper pb-24">
       <header className="bg-cosmos text-white">
@@ -25,11 +29,14 @@ function ChartPage() {
           <div className="text-[11px] uppercase tracking-[0.22em] text-white/60">Deep dive</div>
           <h1 className="mt-1 font-serif text-3xl">✦ Your chart</h1>
           <p className="mt-2 text-sm text-white/70">
-            {today.ascendant} rising · {today.mahadasha} Mahadasha / {today.antardasha} Antardasha
+            {today.ascendant} rising · Moon in {today.user.moonSign.split(" ")[0]} · {today.user.birthNakshatra} nakshatra
+          </p>
+          <p className="mt-1 text-xs text-white/50">
+            {today.mahadasha} MD / {today.antardasha} AD / {today.pratyantardasha} PD
           </p>
         </div>
         <div className="mx-auto flex max-w-2xl gap-1 overflow-x-auto px-5 pb-3 text-xs uppercase tracking-[0.15em]">
-          {(["ask", "dimensions", "wheel", "remedies"] as const).map((t) => (
+          {tabs.map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -45,8 +52,10 @@ function ChartPage() {
 
       <main className="mx-auto max-w-2xl px-5 pt-7">
         {tab === "ask" && <AskChart />}
-        {tab === "dimensions" && <Dimensions />}
         {tab === "wheel" && <Wheel />}
+        {tab === "transits" && <Transits />}
+        {tab === "dasha" && <DashaTree />}
+        {tab === "dimensions" && <Dimensions />}
         {tab === "remedies" && <Remedies />}
       </main>
       <TabBar />
@@ -101,17 +110,48 @@ function AskChart() {
 }
 
 function Dimensions() {
+  const [open, setOpen] = useState<string | null>(today.dimensions[0]?.name ?? null);
   return (
-    <div className="grid gap-2 sm:grid-cols-2">
-      {today.dimensions.map((d) => (
-        <div key={d.name} className="rounded-2xl border border-border bg-card p-4 shadow-paper">
-          <div className="flex items-baseline justify-between">
-            <span className="font-serif text-lg text-ink">{d.name}</span>
-            <span className="font-serif text-2xl text-ink">{d.score}</span>
+    <div className="space-y-2">
+      {today.dimensions.map((d) => {
+        const isOpen = open === d.name;
+        return (
+          <div key={d.name} className="overflow-hidden rounded-2xl border border-border bg-card shadow-paper">
+            <button
+              onClick={() => setOpen(isOpen ? null : d.name)}
+              className="flex w-full items-center gap-4 p-4 text-left"
+            >
+              <span
+                className="grid h-10 w-10 shrink-0 place-items-center rounded-full font-serif text-base text-white"
+                style={{ background: planetColor[d.planet] }}
+              >
+                {planetGlyph[d.planet]}
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="font-serif text-lg text-ink">{d.name}</span>
+                  <span className="font-serif text-2xl tabular-nums text-ink">{d.score}</span>
+                </div>
+                <p className="text-sm italic text-ink-soft">{d.hint}</p>
+              </div>
+              <ChevronDown className={`h-4 w-4 shrink-0 text-ink-soft transition ${isOpen ? "rotate-180" : ""}`} />
+            </button>
+            {isOpen && (
+              <div className="border-t border-border bg-paper-warm/40 px-4 py-3">
+                <p className="text-sm leading-relaxed text-ink">{d.detail}</p>
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {d.houses.map((h) => (
+                    <span key={h} className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2 py-1 text-[10px] uppercase tracking-wider text-ink-soft">
+                      <span className="font-serif text-xs text-primary">H{h}</span>
+                      {houseMeaning[h].split(" · ")[0]}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-          <p className="mt-1 text-sm italic text-ink-soft">{d.hint}</p>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -122,7 +162,6 @@ function Wheel() {
       <svg viewBox="0 0 320 320" className="mx-auto max-w-sm">
         <circle cx="160" cy="160" r="150" fill="none" stroke="oklch(0.78 0.13 80 / 0.3)" />
         <circle cx="160" cy="160" r="100" fill="none" stroke="oklch(0.78 0.13 80 / 0.2)" />
-        {/* 12 houses */}
         {Array.from({ length: 12 }).map((_, i) => {
           const a = (i / 12) * Math.PI * 2 - Math.PI / 2;
           const x1 = 160 + Math.cos(a) * 100;
@@ -140,41 +179,59 @@ function Wheel() {
             </g>
           );
         })}
-        {planets.slice(0, 7).map((p, i) => {
-          const a = (i / 7) * Math.PI * 2 - Math.PI / 2;
-          const x = 160 + Math.cos(a) * 60;
-          const y = 160 + Math.sin(a) * 60;
+        {today.transits.map((t, i) => {
+          const a = ((t.house - 1) / 12) * Math.PI * 2 - Math.PI / 2 + Math.PI / 12 + (i % 3) * 0.18 - 0.18;
+          const x = 160 + Math.cos(a) * 70;
+          const y = 160 + Math.sin(a) * 70;
           return (
-            <text key={p} x={x} y={y} textAnchor="middle" fontSize="18"
-              fill="oklch(0.35 0.09 280)" fontFamily="Cormorant Garamond">
-              {planetGlyph[p]}
-            </text>
+            <g key={t.planet}>
+              <circle cx={x} cy={y} r="11" fill={planetColor[t.planet]} opacity="0.9" />
+              <text x={x} y={y + 4} textAnchor="middle" fontSize="13" fill="white" fontFamily="Cormorant Garamond">
+                {planetGlyph[t.planet]}
+              </text>
+            </g>
           );
         })}
         <circle cx="160" cy="160" r="3" fill="oklch(0.78 0.13 80)" />
       </svg>
       <p className="mt-4 text-center text-sm italic text-ink-soft">
-        North Indian style chart · {today.ascendant} ascendant
+        North Indian style · {today.ascendant} ascendant · planets shown in transit houses
       </p>
     </div>
   );
 }
 
 function Remedies() {
+  const remedies: Record<Planet, { gem: string; day: string; charity: string }> = {
+    Sun: { gem: "Ruby", day: "Sunday", charity: "Wheat, jaggery to the elderly" },
+    Moon: { gem: "Pearl", day: "Monday", charity: "Milk, rice to a mother" },
+    Mars: { gem: "Red coral", day: "Tuesday", charity: "Lentils, donate blood" },
+    Mercury: { gem: "Emerald", day: "Wednesday", charity: "Green vegetables to students" },
+    Jupiter: { gem: "Yellow sapphire", day: "Thursday", charity: "Books, turmeric to a teacher" },
+    Venus: { gem: "Diamond", day: "Friday", charity: "White flowers, sweets to a woman" },
+    Saturn: { gem: "Blue sapphire", day: "Saturday", charity: "Black sesame, oil to a worker" },
+    Rahu: { gem: "Hessonite", day: "Saturday", charity: "Feed a stray dog" },
+    Ketu: { gem: "Cat's eye", day: "Tuesday", charity: "Multi-colored cloth to a child" },
+  };
   return (
-    <div className="space-y-3">
-      {planets.map((p) => (
-        <div key={p} className="flex items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-paper">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary font-serif text-2xl text-primary">
-            {planetGlyph[p]}
+    <div className="space-y-2">
+      {planets.map((p) => {
+        const r = remedies[p];
+        return (
+          <div key={p} className="flex items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-paper">
+            <div
+              className="grid h-12 w-12 shrink-0 place-items-center rounded-full font-serif text-2xl text-white"
+              style={{ background: planetColor[p] }}
+            >
+              {planetGlyph[p]}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="font-serif text-base text-ink">{p}</div>
+              <div className="text-[11px] text-ink-soft">{r.gem} · {r.day} · {r.charity}</div>
+            </div>
           </div>
-          <div className="flex-1">
-            <div className="font-serif text-base text-ink">{p}</div>
-            <div className="text-xs text-ink-soft">Daily remedy guidance</div>
-          </div>
-          <button className="text-xs text-primary">Open →</button>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
