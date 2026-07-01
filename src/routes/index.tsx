@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { CosmicHero } from "@/components/jyotish/CosmicHero";
 import { TabBar } from "@/components/jyotish/TabBar";
 import { Panchanga } from "@/components/jyotish/Panchanga";
@@ -23,6 +24,12 @@ export const Route = createFileRoute("/")({
 });
 
 function Today() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (typeof window !== "undefined" && !localStorage.getItem("jyotish.onboarded.v1")) {
+      navigate({ to: "/onboarding" });
+    }
+  }, [navigate]);
   return (
     <div className="min-h-screen bg-paper pb-24">
       <CosmicHero />

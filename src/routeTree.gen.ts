@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as YouRouteImport } from './routes/you'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as ChartRouteImport } from './routes/chart'
 import { Route as IndexRouteImport } from './routes/index'
 
 const YouRoute = YouRouteImport.update({
   id: '/you',
   path: '/you',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChartRoute = ChartRouteImport.update({
@@ -32,30 +38,34 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/chart': typeof ChartRoute
+  '/onboarding': typeof OnboardingRoute
   '/you': typeof YouRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/chart': typeof ChartRoute
+  '/onboarding': typeof OnboardingRoute
   '/you': typeof YouRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/chart': typeof ChartRoute
+  '/onboarding': typeof OnboardingRoute
   '/you': typeof YouRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/chart' | '/you'
+  fullPaths: '/' | '/chart' | '/onboarding' | '/you'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/chart' | '/you'
-  id: '__root__' | '/' | '/chart' | '/you'
+  to: '/' | '/chart' | '/onboarding' | '/you'
+  id: '__root__' | '/' | '/chart' | '/onboarding' | '/you'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ChartRoute: typeof ChartRoute
+  OnboardingRoute: typeof OnboardingRoute
   YouRoute: typeof YouRoute
 }
 
@@ -66,6 +76,13 @@ declare module '@tanstack/react-router' {
       path: '/you'
       fullPath: '/you'
       preLoaderRoute: typeof YouRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/chart': {
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ChartRoute: ChartRoute,
+  OnboardingRoute: OnboardingRoute,
   YouRoute: YouRoute,
 }
 export const routeTree = rootRouteImport
